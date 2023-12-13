@@ -53,6 +53,7 @@ async function createNewTrainingLeg(matchId) {
         // Check that match id exist's
         const [matchExistsResult] = await dbConnection.execute(sqlCmd.CHECK_501_TRAINING_MATCH_EXISTS, [matchId]);
         if (matchExistsResult[0].matchExists == 1) {
+            await dbConnection.beginTransaction();
             let legNumber = 0
 
             // Get last leg number
