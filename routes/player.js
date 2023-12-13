@@ -11,20 +11,20 @@ router.post('/createPlayer', async (req, res) => {
     console.log("trying to add player: " + playerName);
 
     try {
-        await db_pool.execute("INSERT INTO players(player_name) VALUES (?)", [playerName]);
-        res.status(200).json("Player added! " + playerName);
+        const [result] = await db_pool.execute("INSERT INTO players(player_name) VALUES (?)", [playerName]);
+
+        console.log(`Player created: ${playerName} ${result.insertId}`);
+        res.status(200).json({player_name: playerName, player_id: result.insertId});
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
     }
 
-    console.log("Player Added!");
 });
 
 /**
  * Get all players and id's
  */
-
 router.get('/getPlayers', async (req, res) => {
 
     try {
