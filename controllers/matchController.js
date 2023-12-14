@@ -5,8 +5,9 @@ const sqlCmd = {
     CHECK_PLAYER_EXISTS: 'SELECT EXISTS( SELECT * FROM players WHERE player_id=?) as playerExists',
     CHECK_501_TRAINING_MATCH_EXISTS: 'SELECT EXISTS( SELECT training_match_id FROM 501_training_matches WHERE training_match_id=?) as matchExists',
     GET_LAST_TRAINING_LEG_NRO: 'SELECT leg_number FROM 501_training_legs WHERE training_match_id=?',
-    CREATE_NEW_TRAINING_LEG: 'INSERT INTO 501_training_legs (training_match_id, leg_number) VALUES(?,?)'
+    CREATE_NEW_TRAINING_LEG: 'INSERT INTO 501_training_legs (training_match_id, leg_number, current_score) VALUES(?,?,?)'
 }
+
 /**
  * Creates new 501 training match
  */
@@ -45,7 +46,7 @@ async function createNewTrainingMatch(playerId) {
  * Creates a new leg for 501 training match.
  * Requires: matchId
  */
-async function createNewTrainingLeg(matchId) {
+async function createNewTrainingLeg(matchId, startingScore) {
     let dbConnection;
     try {
         dbConnection = await dbPool.getConnection();
@@ -63,9 +64,10 @@ async function createNewTrainingLeg(matchId) {
 
                 legNumber = legNumberResult[0].leg_number + 1
             }
+
             // Create a new leg
-            const [newLegResult] = await dbConnection.execute(sqlCmd.CREATE_NEW_TRAINING_LEG, [matchId, legNumber]);
-            
+            const [newLegResult] = await dbConnection.execute(sqlCmd.CREATE_NEW_TRAINING_LEG, [matchId, legNumber, startingScore]);
+
             // Retrieve training leg ID from the result
             trainingLegId = newLegResult.insertId;
 
@@ -81,5 +83,6 @@ async function createNewTrainingLeg(matchId) {
         throw error;
     }
 }
+
 
 module.exports = { createNewTrainingMatch, createNewTrainingLeg };
